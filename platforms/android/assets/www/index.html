@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1">
+        <title>RDF</title>
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css" />
+        <script type="text/javascript">
+            //app.initialize();
+            document.addEventListener("deviceready", onDeviceReady, false);
+            var db = openDatabase('MyDB', '1.0', 'My Sample DB', 100 * 1024);
+            // Cordova is ready
+            //
+            function onDeviceReady() { 
+
+            }
+            function crearDb(){
+                var db = openDatabase('MyDB', '1.0', 'My Sample DB', 100 * 1024);
+                db.transaction(PopulateDB, errorCB);
+            }
+
+            // Populate the database 
+            function PopulateDB(tx) {
+                 tx.executeSql("CREATE TABLE IF NOT EXISTS cursos(id PRIMARY KEY ASC,curso TEXT,cantAlu INTEGER)");
+                 //tx.executeSql("Select * from Materia",[],ejecutar,errorCB); 
+                alert("hola");
+            }
+
+            // Transaction error callback
+            //
+            function errorCB(err) {
+                alert("Error processing SQL: "+err.message);
+            }
+
+            // Transaction success callback
+            //
+            function successCB() {
+                alert("success!");
+            }
+
+            function guardarNum(){
+                var db = openDatabase('MyDB', '1.0', 'My Sample DB', 100 * 1024);
+                db.transaction(guardarCurso,errorCB);
+                //document.getElementById('mostrado').value = 'resultado';
+                //$('input[id=mostrado]').val(resultado);
+            }
+            function guardarCurso(tx){
+                var año = document.getElementById('año').val();
+                var division = document.getElementById('division').val();
+                alert(año+curso);
+                tx.executeSql("Insert into cursos(curso) values('"+año+division+"')");
+                alert("se ha guardado el curso");      
+            }
+
+            function cargarCursoT(){
+                var db = openDatabase('MyDB', '1.0', 'My Sample DB', 100 * 1024);
+                db.transaction(cargarCursoC,errorCB);
+            }
+            function cargarCursoC(tx){
+                tx.executeSql("SELECT * FROM cursos",[],function(tx,results){
+                            var answer = result.rows.length;
+                            $('input[id=mostrado]').val(answer);},errorCB);
+                $('input[id=mostrado]').val(answer);
+            }
+
+            /*/function cargarCurso(tx,results){
+                //for(var i=0; i<result.rows.length; i++) {
+                //    $('input[id=mostrado]').append("<li> <a id='"+results.rows.item(i).id + "'>" + results.rows.item(i).nombre + "</a></li>");
+                //}
+                var answer = results.rows.item(0);
+                $('input[id=mostrado]').val(answer.curso);
+                alert("3");
+
+            }/*/
+</script>
+
+    </head>
+    <body onload="crearDb();">
+
+        <div data-role="page" id="crear">
+            <div data-role="header" data-theme="b"><h1>RDF</h1>
+                <div data-role="navbar">
+                    <ul>
+                      <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
+                      <li><a href="#estadisticas" data-ajax="true">Estadisticas</a></li>
+                      <li><a href="#editar" data-ajax="true">Editar</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+    
+            <div data-role="content" style="padding:0">    	
+                <h3 class="ui-bar ui-bar-a ui-corner-all">CREAR CURSO</h3>
+                  <div class="ui-body ui-body-a">
+                        <div class="ui-field-contain">
+                            <label for="año">Año:</label>
+                            <select name="select-custom-1" id="año" data-native-menu="true">
+                                <option value="1">1°</option>
+                                <option value="2">2°</option>
+                                <option value="3">3°</option>
+                                <option value="4">4°</option>
+                                <option value="5">5°</option>
+                                <option value="6">6°</option>
+                                <option value="7">7°</option>
+                            </select>
+                        </div>
+                        <div class="ui-field-contain">
+                            <label for="division">Division:</label>
+                            <select name="select-custom-1" id="division" data-native-menu="true">
+                                <option value="a">A</option>
+                                <option value="b">B</option>
+                                <option value="c">C</option>
+                            </select>
+                        </div>
+                        <div class="ui-field-contain">
+                            <label for="number-1">Cantidad de alumnos:</label>
+                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                        </div>
+                  </div>
+                    <button href="#" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="guardarNum()">Guardar</button>
+                    <button href="#" class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left">Limpiar</button>
+                </div>
+            </div>
+        <div data-role="page" id="estadisticas">
+            <div data-role="header" data-theme="b"><h1>RDF</h1>
+                <div data-role="navbar">
+                    <ul>
+                      <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
+                      <li><a href="#calcular" data-ajax="true">Estadisticas</a></li>
+                      <li><a href="#editar" data-ajax="true">Editar</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div data-role="content" style="padding:0">    	
+                <h3 class="ui-bar ui-bar-a ui-corner-all">ESTADISTICAS</h3>
+                  <div class="ui-body ui-body-a">
+                        <div class="ui-field-contain">
+                            <label for="select-custom-1">Curso:</label>
+                            <select name="select-custom-1" id="select-custom-2" data-native-menu="true">
+                                <option value="1">1°</option>
+                                <option value="2">2°</option>
+                                <option value="3">3°</option>
+                            </select>
+                        </div>
+                      
+                        <div class="ui-field-contain">
+                            <label for="text-disable">Cantidad de alumnos:</label>
+                                <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                            </select>
+                        </div>
+                
+                        <div class="ui-field-contain">
+                            <label for="number-1">Dias habiles:</label>
+                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                        </div>
+                
+                        <div class="ui-field-contain">
+                            <label for="number-1">Total de inasistencias:</label>
+                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                        </div>
+                
+                  </div>
+                    <button href="#calcular" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="">Calcular</button>
+                </div>
+                    <div data-role="content" style="padding:0">
+                        <div class="ui-body ui-body-a">
+                            <div class="ui-field-contain">
+                                <label for="text-disable">TOTAL DE ASISTENCIAS:</label>
+                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                </select>
+                            </div>
+                            <div class="ui-field-contain">
+                                <label for="text-disable">TOTAL DE INASISTENCIAS:</label>
+                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                </select>
+                            </div>
+                            <div class="ui-field-contain">
+                                <label for="text-disable">ASISTENCIA MEDIA:</label>
+                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                </select>
+                            </div>
+                            <div class="ui-field-contain">
+                                <label for="text-disable">PORCENTAJE DE ASISTENCIA:</label>
+                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+
+
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
+
+
+</html>

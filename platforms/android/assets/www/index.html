@@ -6,6 +6,11 @@
         <title>RDF</title>
         <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
         <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css" />
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/calculos.js"></script>
+        <script src="js/jquery-1.11.1.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
         <script type="text/javascript">
             //app.initialize();
             document.addEventListener("deviceready", onDeviceReady, false);
@@ -22,10 +27,18 @@
 
             // Populate the database 
             function PopulateDB(tx) {
-                 tx.executeSql("CREATE TABLE IF NOT EXISTS cursos(id PRIMARY KEY ASC,curso TEXT,cantAlu INTEGER)");
-                 //tx.executeSql("Select * from Materia",[],ejecutar,errorCB); 
-                alert("hola");
+                 tx.executeSql("CREATE TABLE IF NOT EXISTS cursos(id INTEGER PRIMARY KEY ASC,curso TEXT,cantAlu INTEGER)");
+                 //tx.executeSql("Select * from Materia",[],ejecutar,errorCB);
             }
+            function borrarDB(){
+                var db = openDatabase('MyDB', '1.0', 'My Sample DB', 100 * 1024);
+                db.transaction(borrarDBQ, errorCB);
+                }
+            function borrarDBQ(tx){
+                tx.executeSql("DROP TABLE IF EXISTS cursos");
+                tx.executeSql("CREATE TABLE IF NOT EXISTS cursos(id INTEGER PRIMARY KEY ASC,curso TEXT,cantAlu INTEGER)");
+                alert('La base de datos ha sido borrada');
+                }
 
             // Transaction error callback
             //
@@ -46,10 +59,10 @@
                 //$('input[id=mostrado]').val(resultado);
             }
             function guardarCurso(tx){
-                var año = document.getElementById('año').val();
-                var division = document.getElementById('division').val();
-                alert(año+curso);
-                tx.executeSql("Insert into cursos(curso) values('"+año+division+"')");
+                //var año = document.getElementById('año').val();
+                //var division = document.getElementById('division').val();
+                alert($( "#anio" ).val()+$( "#division" ).val());
+                tx.executeSql("Insert into cursos(curso,cantAlu) values('"+$( "#anio" ).val()+$( "#division" ).val()+"','"+$( "#cantAlumnos" ).val()+"')");
                 alert("se ha guardado el curso");      
             }
 
@@ -60,19 +73,42 @@
             function cargarCursoC(tx){
                 tx.executeSql("SELECT * FROM cursos",[],function(tx,results){
                             var answer = result.rows.length;
-                            $('input[id=mostrado]').val(answer);},errorCB);
+                            $('input[id=mostrado]').val(answer)},errorCB);
                 $('input[id=mostrado]').val(answer);
             }
+            
+            function actualizarSelect(){
+                db.transaction(actualizarSelectQ,errorCB);
+                var miselect = $( "#selectCurso option" ).size();
+                var misel = document.getElementById('selectCurso');
+                for(i=0;i<miselect;i++){
+                    if(miselect != 1){
+                    misel.remove(i);
+                    }
+                }
+            }
+            function actualizarSelectQ(tx){
+                tx.executeSql("SELECT * FROM cursos",[],actualizarSelectS,errorCB);
+                }
+            function actualizarSelectS(tx,results){
+                var misel = document.getElementById('selectCurso');
+                for(i=0;i<results.rows.length;i++){
+                    var option = document.createElement("option");
+                    option.value = results.rows.item(i).curso;
+                    option.text = results.rows.item(i).curso;
+                    misel.add(option);
+                    }
+                }
 
-            /*/function cargarCurso(tx,results){
-                //for(var i=0; i<result.rows.length; i++) {
-                //    $('input[id=mostrado]').append("<li> <a id='"+results.rows.item(i).id + "'>" + results.rows.item(i).nombre + "</a></li>");
-                //}
-                var answer = results.rows.item(0);
-                $('input[id=mostrado]').val(answer.curso);
-                alert("3");
-
-            }/*/
+            function mostrarCant(){
+                db.transaction(mostrarCantQ,errorCB);
+                }
+            function mostrarCantQ(tx){
+                tx.executeSql("SELECT * FROM cursos WHERE curso='"+$("#selectCurso").val()+"'",[],mostrarCantR,errorCB);
+                }
+            function mostrarCantR(tx,results){
+                $('#cantMostrar').val(results.rows.item(0).cantAlu);
+                }
 </script>
 
     </head>
@@ -83,7 +119,7 @@
                 <div data-role="navbar">
                     <ul>
                       <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
-                      <li><a href="#estadisticas" data-ajax="true">Estadisticas</a></li>
+                      <li><a href="#estadisticas" data-ajax="true" onclick="actualizarSelect()">Estadisticas</a></li>
                       <li><a href="#editar" data-ajax="true">Editar</a></li>
                     </ul>
                 </div>
@@ -94,8 +130,8 @@
                 <h3 class="ui-bar ui-bar-a ui-corner-all">CREAR CURSO</h3>
                   <div class="ui-body ui-body-a">
                         <div class="ui-field-contain">
-                            <label for="año">Año:</label>
-                            <select name="select-custom-1" id="año" data-native-menu="true">
+                            <label for="anio">Año:</label>
+                            <select name="select-custom-1" id="anio" data-native-menu="true">
                                 <option value="1">1°</option>
                                 <option value="2">2°</option>
                                 <option value="3">3°</option>
@@ -114,12 +150,12 @@
                             </select>
                         </div>
                         <div class="ui-field-contain">
-                            <label for="number-1">Cantidad de alumnos:</label>
-                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                            <label for="cantAlumnos">Cantidad de alumnos:</label>
+                            <input data-clear-btn="false" name="number-1" id="cantAlumnos" value="" type="number">
                         </div>
                   </div>
                     <button href="#" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="guardarNum()">Guardar</button>
-                    <button href="#" class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left">Limpiar</button>
+                    <button  class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left" onclick="borrarDB()" >Limpiar</button>
                 </div>
             </div>
         <div data-role="page" id="estadisticas">
@@ -127,7 +163,7 @@
                 <div data-role="navbar">
                     <ul>
                       <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
-                      <li><a href="#calcular" data-ajax="true">Estadisticas</a></li>
+                      <li><a href="#calcular" data-ajax="true"  onclick="actualizarSelect()">Estadisticas</a></li>
                       <li><a href="#editar" data-ajax="true">Editar</a></li>
                     </ul>
                 </div>
@@ -137,18 +173,17 @@
                 <h3 class="ui-bar ui-bar-a ui-corner-all">ESTADISTICAS</h3>
                   <div class="ui-body ui-body-a">
                         <div class="ui-field-contain">
-                            <label for="select-custom-1">Curso:</label>
-                            <select name="select-custom-1" id="select-custom-2" data-native-menu="true">
-                                <option value="1">1°</option>
-                                <option value="2">2°</option>
-                                <option value="3">3°</option>
+                            <label for="selectCurso">Curso:</label>
+                            <select name="select-custom-1" id="selectCurso" data-native-menu="true" onchange="mostrarCant()">
+                                <option value='1' disabled selected>Seleccione un curso</option>
                             </select>
                         </div>
                       
                         <div class="ui-field-contain">
-                            <label for="text-disable">Cantidad de alumnos:</label>
-                                <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                            <label for="cantMostrar">Cantidad de alumnos:</label>
+                                <input name="text-10" id="cantMostrar" value="" type="text">
                             </select>
+                      <button  class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left" onclick="mostrarCant()" >Mostrar cant</button>
                         </div>
                 
                         <div class="ui-field-contain">
@@ -192,11 +227,7 @@
 
 
 
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
 
-        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-        <script src="js/jquery.mobile-1.4.5.min.js"></script>
 
 
 </html>

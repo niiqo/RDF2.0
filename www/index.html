@@ -6,6 +6,11 @@
         <title>RDF</title>
         <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
         <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css" />
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/calculos.js"></script>
+        <script src="js/jquery-1.11.1.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
         <script type="text/javascript">
             //app.initialize();
             document.addEventListener("deviceready", onDeviceReady, false);
@@ -56,7 +61,7 @@
             function guardarCurso(tx){
                 //var año = document.getElementById('año').val();
                 //var division = document.getElementById('division').val();
-                alert($( "#anio" ).val()+$( "#division" ).val());
+                //alert($( "#anio" ).val()+$( "#division" ).val());
                 tx.executeSql("Insert into cursos(curso,cantAlu) values('"+$( "#anio" ).val()+$( "#division" ).val()+"','"+$( "#cantAlumnos" ).val()+"')");
                 alert("se ha guardado el curso");      
             }
@@ -77,9 +82,7 @@
                 var miselect = $( "#selectCurso option" ).size();
                 var misel = document.getElementById('selectCurso');
                 for(i=0;i<miselect;i++){
-                    if(miselect != 1){
-                    misel.remove(i);
-                    }
+                    misel.remove(i+1);
                 }
             }
             function actualizarSelectQ(tx){
@@ -102,7 +105,13 @@
                 tx.executeSql("SELECT * FROM cursos WHERE curso='"+$("#selectCurso").val()+"'",[],mostrarCantR,errorCB);
                 }
             function mostrarCantR(tx,results){
-                $('#cantAlumnos').val(results.rows.item(0).cantAlu);
+                $('#cantMostrar').val(results.rows.item(0).cantAlu);
+                }
+            function calcularAsis(){
+                $('#totalAsis').val(($('#cantMostrar').val()*$('#diasH').val())-$('#tInas').val());
+                $('#totalInasis').val($('#tInas').val());
+                $('#asisMedia').val(($('#totalAsis').val()/$('#diasH').val()).toFixed(2));
+                $('#porAsis').val((($('#totalAsis').val()*100)/($('#cantMostrar').val()*$('#diasH').val())).toFixed(2));
                 }
 </script>
 
@@ -115,7 +124,6 @@
                     <ul>
                       <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
                       <li><a href="#estadisticas" data-ajax="true" onclick="actualizarSelect()">Estadisticas</a></li>
-                      <li><a href="#editar" data-ajax="true">Editar</a></li>
                     </ul>
                 </div>
             </div>
@@ -150,7 +158,8 @@
                         </div>
                   </div>
                     <button href="#" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="guardarNum()">Guardar</button>
-                    <button  class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left" onclick="borrarDB()" >Limpiar</button>
+                    <!--<button  class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left" onclick="borrarDB()" >Limpiar</button>-->
+                    <button  class="ui-btn ui-btn-inline ui-icon-delete ui-btn-icon-left" onclick="borrarDB()" >Borrar cursos</button>
                 </div>
             </div>
         <div data-role="page" id="estadisticas">
@@ -159,7 +168,6 @@
                     <ul>
                       <li><a href="#crear" data-ajax="true" class="ui-icon-plus">Crear</a></li>
                       <li><a href="#calcular" data-ajax="true"  onclick="actualizarSelect()">Estadisticas</a></li>
-                      <li><a href="#editar" data-ajax="true">Editar</a></li>
                     </ul>
                 </div>
             </div>
@@ -170,49 +178,49 @@
                         <div class="ui-field-contain">
                             <label for="selectCurso">Curso:</label>
                             <select name="select-custom-1" id="selectCurso" data-native-menu="true" onchange="mostrarCant()">
-                                <option value='1' disabled selected>Seleccione un curso</option>
+                                <option value='1' selected>Seleccione un curso</option>
                             </select>
                         </div>
                       
                         <div class="ui-field-contain">
-                            <label for="cantAlumnos">Cantidad de alumnos:</label>
-                                <input name="text-10" id="cantAlumnos" value="" type="text">
+                            <label for="cantMostrar">Cantidad de alumnos:</label>
+                                <input name="text-10" id="cantMostrar" value="" type="text" disabled>
                             </select>
                         </div>
                 
                         <div class="ui-field-contain">
-                            <label for="number-1">Dias habiles:</label>
-                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                            <label for="diasH">Dias habiles:</label>
+                            <input data-clear-btn="false" name="number-1" id="diasH" value="" type="number">
                         </div>
                 
                         <div class="ui-field-contain">
-                            <label for="number-1">Total de inasistencias:</label>
-                            <input data-clear-btn="false" name="number-1" id="number-1" value="" type="number">
+                            <label for="tInas">Total de inasistencias:</label>
+                            <input data-clear-btn="false" name="number-1" id="tInas" value="" type="number">
                         </div>
                 
                   </div>
-                    <button href="#calcular" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="">Calcular</button>
+                    <button href="#calcular" class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left" onclick="calcularAsis()">Calcular</button>
                 </div>
                     <div data-role="content" style="padding:0">
                         <div class="ui-body ui-body-a">
                             <div class="ui-field-contain">
-                                <label for="text-disable">TOTAL DE ASISTENCIAS:</label>
-                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                <label for="totalAsis">TOTAL DE ASISTENCIAS:</label>
+                                    <input disabled="disabled" name="text-10" id="totalAsis" value="" type="text">
                                 </select>
                             </div>
                             <div class="ui-field-contain">
-                                <label for="text-disable">TOTAL DE INASISTENCIAS:</label>
-                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                <label for="totalInasis">TOTAL DE INASISTENCIAS:</label>
+                                    <input disabled="disabled" name="text-10" id="totalInasis" value="" type="text">
                                 </select>
                             </div>
                             <div class="ui-field-contain">
-                                <label for="text-disable">ASISTENCIA MEDIA:</label>
-                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                <label for="asisMedia">ASISTENCIA MEDIA:</label>
+                                    <input disabled="disabled" name="text-10" id="asisMedia" value="" type="text">
                                 </select>
                             </div>
                             <div class="ui-field-contain">
-                                <label for="text-disable">PORCENTAJE DE ASISTENCIA:</label>
-                                    <input disabled="disabled" name="text-10" id="text-10" value="" type="text">
+                                <label for="porAsis">PORCENTAJE DE ASISTENCIA:</label>
+                                    <input disabled="disabled" name="text-10" id="porAsis" value="" type="text">
                                 </select>
                             </div>
                         </div>
@@ -221,11 +229,7 @@
 
 
 
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
 
-        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-        <script src="js/jquery.mobile-1.4.5.min.js"></script>
 
 
 </html>
